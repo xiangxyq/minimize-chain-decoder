@@ -1,3 +1,11 @@
+
+#
+# This file is used for build
+#
+# author: xiangxyq
+# E-mail: xiangxyq@foxmail.com
+#
+
 CC = gcc
 CXX = g++
 STRIP = strip
@@ -7,23 +15,24 @@ OPENBLASINC = ../../tools/openblas/install/include
 OPENBLASLIBS = ../../tools/openblas/install/lib/libopenblas.a
 
 ALSAINC = ../../tools/alsa/install/include
-ALSALIBS = ../../tools/alsa/install/lib/libasound.so
+ALSALIBS = ../../tools/alsa/install/lib
 
-PORTAUDIOINC = ../../tools/portaudio/install/include
-PORTAUDIOLIBS = ../../tools/portaudio/install/lib/libportaudio.a
-
-CC_OPTIONS = -std=c99 -I.. -I$(OPENBLASINC) -I$(ALSAINC) -I$(PORTAUDIOINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self
-CXX_OPTIONS = -std=c++11 -I.. -I$(OPENBLASINC) -I$(ALSAINC) -I$(PORTAUDIOINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self
+CC_OPTIONS = -std=c99 -I.. -I$(OPENBLASINC) -I$(ALSAINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self
+CXX_OPTIONS = -std=c++11 -I.. -I$(OPENBLASINC) -I$(ALSAINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self
 
 
-LIBS = -ldl -lpthread -lm $(OPENBLASLIBS) $(ALSALIBS) $(PORTAUDIOLIBS)
+LIBS = -ldl  -lm $(OPENBLASLIBS) -L$(ALSALIBS) -lasound -lpthread
 
-OBJ = asr-math.o mel-banks.o srfft.o compute-feat.o main.o
+OBJ = audio-capture.o asr-math.o mel-banks.o srfft.o compute-feat.o main.o
 
 decoder.bin : $(OBJ)
 	$(CXX) -o decoder.bin $(OBJ) $(LIBS)
 	$(STRIP) decoder.bin
 	rm *.o
+
+#audio
+audio-capture.o : ../audio/audio-capture.cc
+	$(CXX) $(CXX_OPTIONS) ../audio/audio-capture.cc
 
 #utils
 asr-math.o : ../utils/asr-math.cc

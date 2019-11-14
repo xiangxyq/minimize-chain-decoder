@@ -24,10 +24,6 @@ cp src/.libs/* install/lib -R
 cp include install/include -R
 cd ../
 
-################################################## portaudio libs download && compile ##################################################
-./install_portaudio.sh
-
-
 ################################################## OpenBLAS libs download && compile ##################################################
 echo "*********************** Download OpenBLAS v0.3.6.tar.gz ***********************"
 if [ ! -f "./v0.3.6.tar.gz" ];then
