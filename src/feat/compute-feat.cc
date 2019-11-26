@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cstring>
 #include "compute-feat.h"
+#include "../configs/feat-conf.h"
 #include "mel-banks.h"
 #include "srfft.h"
 #include "../utils/asr-math.h"
@@ -219,7 +220,7 @@ void FeatsFree(vector<BaseFloat* > &feats)
 	feats.clear();
 }
 
-void FeatExtractDestroy(vector<BaseFloat* > &feats)
+void FeatDestroy(vector<BaseFloat* > &feats)
 {
 	FreeMelBanksMemory();
 	FreeSrfftMemory();

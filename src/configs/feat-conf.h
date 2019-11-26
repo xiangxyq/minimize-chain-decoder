@@ -7,13 +7,11 @@
 * E-mail: xiangxyq@foxmail.com
 */
 
-
-#ifndef FEAT_PARAMS_H
-#define FEAT_PARAMS_H
+#ifndef FEAT_CONF_H
+#define FEAT_CONF_H
 
 #include <cmath>
 #include "../utils/asr-types.h"
-
 
 // Define mfcc sample rate, frame shift, frame length and preemph coeff
 #define SAMPLEING_RATE        (16000.0f)
@@ -89,4 +87,4 @@ static inline int32 RoundUpToNearestPowerOfTwo(int32 n)
 #define COMPLEX_N              (static_cast<int32>((PADDING_WINDOWS_SIZE) / 2))
 
 
-#endif // FEAT_PARAMS_H
+#endif // FEAT_CONF_H

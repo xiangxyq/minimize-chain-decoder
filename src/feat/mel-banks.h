@@ -8,11 +8,9 @@
 #ifndef MEL_BANKS_H
 #define MEL_BANKS_H
 
-#include "feat-params.h"
+#include "../utils/asr-types.h"
 
-/*
-mel bins struct
-*/
+// mel bins struct
 typedef struct
 {
 	int32 offset;

@@ -10,6 +10,7 @@
 #include <cstring>
 #include "srfft.h"
 #include "../utils/asr-math.h"
+#include "../configs/feat-conf.h"
 
 using namespace std;
 

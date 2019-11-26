@@ -9,6 +9,7 @@
 #define ASR_MATH_H
 
 #include "asr-types.h"
+#include "matrix.h"
 
 #ifndef M_PI
 #define M_PI       (3.1415926535897932384626433832795)
@@ -33,7 +34,10 @@ extern BaseFloat VecVec(const BaseFloat *a, const BaseFloat *b, int32 len);
 
 extern void AddMatVec(const BaseFloat alpha, const BaseFloat *M, int32 M_rows, int32 M_cols, int32 stride,
 	MatrixTransposeType trans, const BaseFloat *v, int32 v_len, const BaseFloat beta, BaseFloat *result, int32 result_len);
-// ###################### Below math use openblas interfaces End ######################
+
+extern void AddMatMat(const BaseFloat alpha, const Matrix *A, MatrixTransposeType transA,
+					const Matrix *B, MatrixTransposeType transB, const BaseFloat beta, Matrix *out);
+// ###################### Above math use openblas interfaces End ######################
 
 extern void VectorAdd(BaseFloat *vec, int32 len, BaseFloat c);
 
@@ -45,6 +49,8 @@ extern BaseFloat VectorSum(BaseFloat *vec, int32 len);
 
 extern void VectorMulElements(BaseFloat *vec1, BaseFloat *vec2, int32 len);
 
+extern void MatApplyFloor(Matrix *M, const BaseFloat floor_val);
+
 extern void ComplexImExp(BaseFloat x, BaseFloat *a_re, BaseFloat *a_im);
 
 //! ComplexMul implements, inline, the complex multiplication b *= a.
@@ -53,6 +59,8 @@ extern void ComplexMul(const BaseFloat a_re, const BaseFloat a_im, BaseFloat *b_
 extern void ComplexAddProduct(const BaseFloat a_re, const BaseFloat a_im,
 	const BaseFloat b_re, const BaseFloat b_im,
 	BaseFloat *c_re, BaseFloat *c_im);
+
+extern bool ApproxEqual(BaseFloat a, BaseFloat b, BaseFloat relative_tolerance);
 
 
 #endif //ASR_MATH_H

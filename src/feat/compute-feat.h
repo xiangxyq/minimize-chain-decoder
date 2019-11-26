@@ -9,7 +9,7 @@
 #define COMPUTE_FEAT_H
 
 #include <vector>
-#include "feat-params.h"
+#include "../utils/asr-types.h"
 using namespace std;
 
 // feature extraction init itf

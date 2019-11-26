@@ -8,8 +8,7 @@
 #ifndef SRFFT_H
 #define SRFFT_H
 
-#include "feat-params.h"
-
+#include "../utils/asr-types.h"
 
 extern void SplitRadixFftInit();
 

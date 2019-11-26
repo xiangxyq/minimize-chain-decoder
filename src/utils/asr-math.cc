@@ -25,7 +25,25 @@ void AddMatVec(const BaseFloat alpha, const BaseFloat *M, int32 M_rows, int32 M_
 	cblas_sgemv(CblasRowMajor, (CBLAS_TRANSPOSE)trans, M_rows,
 		                              M_cols, alpha, M, stride, v, 1, beta, result, 1);
 }
-// ###################### Below math use openblas interfaces End ######################
+
+void AddMatMat(const BaseFloat alpha, const Matrix *A, MatrixTransposeType transA,
+					const Matrix *B, MatrixTransposeType transB, const BaseFloat beta, Matrix *out)
+{
+	assert((transA == kNoTrans && transB == kNoTrans && A->mInfo.num_cols == B->mInfo.num_rows && A->mInfo.num_rows == out->mInfo.num_rows && B->mInfo.num_cols == out->mInfo.num_cols)
+		|| (transA == kTrans && transB == kNoTrans && A->mInfo.num_rows == B->mInfo.num_rows && A->mInfo.num_cols == out->mInfo.num_rows && B->mInfo.num_cols == out->mInfo.num_cols)
+		|| (transA == kNoTrans && transB == kTrans && A->mInfo.num_cols == B->mInfo.num_cols && A->mInfo.num_rows == out->mInfo.num_rows && B->mInfo.num_rows == out->mInfo.num_cols)
+		|| (transA == kTrans && transB == kTrans && A->mInfo.num_rows == B->mInfo.num_cols && A->mInfo.num_cols == out->mInfo.num_rows && B->mInfo.num_rows == out->mInfo.num_cols));
+	assert(A != out && B != out);
+
+	if (out->mInfo.num_rows == 0) return;
+
+	cblas_sgemm(CblasRowMajor, (CBLAS_TRANSPOSE)transA,
+		(CBLAS_TRANSPOSE)transB,
+		out->mInfo.num_rows, out->mInfo.num_cols, transA == kNoTrans ? A->mInfo.num_cols : A->mInfo.num_rows,
+		alpha, A->data, A->mInfo.stride, B->data, B->mInfo.stride,
+		beta, out->data, out->mInfo.stride);
+}
+// ###################### Above math use openblas interfaces End ######################
 
 
 void VectorAdd(BaseFloat *vec, int32 len, BaseFloat c)
@@ -64,6 +82,17 @@ void VectorMulElements(BaseFloat *vec1, BaseFloat *vec2, int32 len)
 		vec1[i] *= vec2[i];
 }
 
+void MatApplyFloor(Matrix *M, const BaseFloat floor_val) 
+{
+	int32 num_rows = M->mInfo.num_rows, num_cols = M->mInfo.num_cols;
+	for (int32 i = 0; i < num_rows; ++i) 
+	{
+		BaseFloat *data = M->data + i * M->mInfo.stride;
+		for (int32 j = 0; j < num_cols; ++j)
+			data[j] = (data[j] < floor_val ? floor_val : data[j]);
+	}
+}
+
 void ComplexImExp(BaseFloat x, BaseFloat *a_re, BaseFloat *a_im)
 {
 	*a_re = cos(x);
@@ -83,4 +112,13 @@ void ComplexAddProduct(const BaseFloat a_re, const BaseFloat a_im,
 {
 	*c_re += b_re * a_re - b_im * a_im;
 	*c_im += b_re * a_im + b_im * a_re;
+}
+
+bool ApproxEqual(BaseFloat a, BaseFloat b, BaseFloat relative_tolerance)
+{
+	// a==b handles infinities.
+	if (a == b) return true;
+	BaseFloat diff = fabs(a - b);
+	if (diff == INFINITY || diff != diff) return false;  // diff is +inf or nan.
+	return (diff <= relative_tolerance * (fabs(a) + fabs(b)));
 }

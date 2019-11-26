@@ -10,6 +10,7 @@
 #include <cstring>
 #include "mel-banks.h"
 #include "../utils/asr-math.h"
+#include "../configs/feat-conf.h"
 
 static MelBins mel_bins[NUM_BINS] = {0};
 static BaseFloat center_freqs[NUM_BINS] = {0};
@@ -46,7 +47,7 @@ void MelBanksInit()
 		mel_bins[bin].offset = first_index;
 		int32 size = last_index + 1 - first_index;
 		mel_bins[bin].len = size;
-		mel_bins[bin].data = (BaseFloat *) malloc(size * sizeof(BaseFloat));
+		mel_bins[bin].data = (BaseFloat *)malloc(size * sizeof(BaseFloat));
 
 		memcpy(mel_bins[bin].data, this_bin + first_index, sizeof(BaseFloat) * size);
 	}

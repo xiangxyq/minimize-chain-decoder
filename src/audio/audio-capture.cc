@@ -8,6 +8,7 @@
 /* Use the newer ALSA API */
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #include <alsa/asoundlib.h>
+#include <iostream>
 #include "audio-capture.h"
 
 #define CHNNAL_NUM    (1)
@@ -18,12 +19,12 @@
 void Read(std::vector<BaseFloat> &data)
 {
   long loops;
-  int rc;
-  int size;
+  int32 rc;
+  int32 size;
   snd_pcm_t *handle;
   snd_pcm_hw_params_t *params;
   unsigned int val;
-  int dir;
+  int32 dir;
   snd_pcm_uframes_t frames;
   char *buffer;
 
@@ -31,7 +32,7 @@ void Read(std::vector<BaseFloat> &data)
   rc = snd_pcm_open(&handle, "default", SND_PCM_STREAM_CAPTURE, 0);
   if (rc < 0) 
   {
-    fprintf(stderr, "unable to open pcm device: %s\n", snd_strerror(rc));
+    std::cout << "unable to open pcm device: " << snd_strerror(rc) << std::endl;
     exit(1);
   }
 
@@ -57,14 +58,14 @@ void Read(std::vector<BaseFloat> &data)
   rc = snd_pcm_hw_params(handle, params);
   if (rc < 0) 
   {
-      fprintf(stderr, "unable to set hw parameters: %s\n", snd_strerror(rc));
+      std::cout << "unable to set hw parameters: " << snd_strerror(rc) << std::endl;
       exit(1);
   }
 
   /* Use a buffer large enough to hold one period */
   snd_pcm_hw_params_get_period_size(params, &frames, &dir);
   size = frames * 2 * CHNNAL_NUM; /* 2 bytes/sample, 1 channels */
-  buffer = (char *) malloc(size);
+  buffer = (char *)malloc(size);
 
   /* We want to loop for 2 seconds */
   snd_pcm_hw_params_get_period_time(params, &val, &dir);
@@ -77,13 +78,13 @@ void Read(std::vector<BaseFloat> &data)
     if (rc == -EPIPE) 
     {
       /* EPIPE means overrun */
-      fprintf(stderr, "overrun occurred\n");
+      std::cout << "overrun occurred" << std::endl;
       snd_pcm_prepare(handle);
     } 
     else if (rc < 0) 
-      fprintf(stderr, "error from read: %s\n", snd_strerror(rc));
+      std::cout << "error from read: " << snd_strerror(rc) << std::endl;
     else if (rc != (int)frames) 
-      fprintf(stderr, "short read, read %d frames\n", rc);
+      std::cout << "short read, read "<< rc << " frames" << std::endl;
     
     int16 *temp = (int16 *) buffer;
     for (int i = 0; i < size / 2; ++i)
