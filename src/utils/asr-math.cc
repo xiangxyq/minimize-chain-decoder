@@ -7,14 +7,26 @@
 
 #include <cmath>
 #include <cassert>
+#include <cstring>
 #include "asr-math.h"
+#ifdef USE_OPENBLAS
 #include "cblas.h"
+#endif
 
 
 // ###################### Below math use openblas interfaces Start ######################
 BaseFloat VecVec(const BaseFloat *a, const BaseFloat *b, int32 len)
 {
+#ifdef USE_OPENBLAS
 	return cblas_sdot(len, a, 1, b, 1);
+#else
+	BaseFloat sum = 0.0f;
+
+	for (int i = 0; i < len; ++i)
+		sum += a[i] * b[i];
+	
+	return sum;
+#endif // USE_OPENBLAS
 }
 
 void AddMatVec(const BaseFloat alpha, const BaseFloat *M, int32 M_rows, int32 M_cols, int32 stride,
@@ -22,8 +34,13 @@ void AddMatVec(const BaseFloat alpha, const BaseFloat *M, int32 M_rows, int32 M_
 {
 	assert((trans == kNoTrans && M_cols == v_len && M_rows == result_len)
 		   || (trans == kTrans && M_rows == v_len && M_cols == result_len));
+#ifdef USE_OPENBLAS
 	cblas_sgemv(CblasRowMajor, (CBLAS_TRANSPOSE)trans, M_rows,
 		                              M_cols, alpha, M, stride, v, 1, beta, result, 1);
+#else
+	for(int i = 0; i < M_rows; ++i)
+		result[i] = VecVec(M + i * M_cols, v, v_len);
+#endif // USE_OPENBLAS
 }
 
 void AddMatMat(const BaseFloat alpha, const Matrix *A, MatrixTransposeType transA,
@@ -36,15 +53,43 @@ void AddMatMat(const BaseFloat alpha, const Matrix *A, MatrixTransposeType trans
 	assert(A != out && B != out);
 
 	if (out->mInfo.num_rows == 0) return;
-
+#ifdef USE_OPENBLAS
 	cblas_sgemm(CblasRowMajor, (CBLAS_TRANSPOSE)transA,
 		(CBLAS_TRANSPOSE)transB,
 		out->mInfo.num_rows, out->mInfo.num_cols, transA == kNoTrans ? A->mInfo.num_cols : A->mInfo.num_rows,
 		alpha, A->data, A->mInfo.stride, B->data, B->mInfo.stride,
 		beta, out->data, out->mInfo.stride);
+#else
+	BaseFloat result = 0.0f ;
+	Matrix A1, B1, C;
+	ResizeMatrix(A->mInfo.num_rows, A->mInfo.num_cols, kDefaultStride, &A1);
+	for(int i = 0;  i < A1.mInfo.num_rows; i++)
+		memcpy(A1.data + i * A1.mInfo.num_cols, A->data + i * A->mInfo.stride, A1.mInfo.num_cols * sizeof(BaseFloat));
+
+	ResizeMatrix(B->mInfo.num_rows, B->mInfo.num_cols, kDefaultStride, &B1);
+	for(int i = 0;  i < B1.mInfo.num_rows; i++)
+		memcpy(B1.data + i * B1.mInfo.num_cols, B->data + i * B->mInfo.stride, B1.mInfo.num_cols * sizeof(BaseFloat));
+
+	ResizeMatrix(A->mInfo.num_rows, B->mInfo.num_rows, kDefaultStride, &C);
+	for(int i = 0 ; i < A->mInfo.num_rows ; i++)
+	{
+		for(int j = 0 ; j < B->mInfo.num_rows; j++)
+		{
+			result = 0.0f ;
+			for(int k = 0 ; k < A->mInfo.num_cols ; ++k)  result += A1.data[i * A->mInfo.num_cols + k] * B1.data[ j* A->mInfo.num_cols + k] ;
+			C.data[i * B->mInfo.num_rows + j] = result ;
+		}
+	}
+	for (int i = 0;  i < C.mInfo.num_rows; i++)
+		for(int j =0 ; j < C.mInfo.num_cols; j++)
+			out->data[i * out->mInfo.stride + j] +=C.data[i * C.mInfo.num_cols + j];
+
+	FreeMatrix(&A1);
+	FreeMatrix(&B1);
+	FreeMatrix(&C);
+#endif // USE_OPENBLAS
 }
 // ###################### Above math use openblas interfaces End ######################
-
 
 void VectorAdd(BaseFloat *vec, int32 len, BaseFloat c)
 {

@@ -10,9 +10,12 @@ CC = gcc
 CXX = g++
 STRIP = strip
 
+USE_OPEN_BLAS=
 
+ifeq ($(USE_OPEN_BLAS) , true)
 OPENBLASINC = ../../tools/openblas/install/include
 OPENBLASLIBS = ../../tools/openblas/install/lib/libopenblas.a
+endif
 
 ALSAINC = ../../tools/alsa/install/include
 ALSALIBS = ../../tools/alsa/install/lib
@@ -20,8 +23,13 @@ ALSALIBS = ../../tools/alsa/install/lib
 CC_OPTIONS = -std=c99 -I.. -I$(OPENBLASINC) -I$(ALSAINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self
 CXX_OPTIONS = -std=c++11 -I.. -I$(OPENBLASINC) -I$(ALSAINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self
 
-
+ifeq ($(USE_OPEN_BLAS), true)
 LIBS = -ldl  -lm $(OPENBLASLIBS) -L$(ALSALIBS) -lasound -lpthread
+C_OPTIONS += -D USE_OPENBLAS
+CXX_OPTIONS += -D USE_OPENBLAS
+else
+LIBS = -ldl  -lm -L$(ALSALIBS) -lasound -lpthread
+endif
 
 OBJ = asr-math.o hash-list.o matrix.o tokens.o \
 	audio-capture.o  mel-banks.o srfft.o compute-feat.o \
