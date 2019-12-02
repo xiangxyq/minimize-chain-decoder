@@ -27,7 +27,7 @@ Notice: openblas just run a general compile, if you need optimize it, should spe
 
 You can know more about in this [github](https://github.com/xianyi/OpenBLAS)
 
-**sooner I will add a generic matrix operation for Optional**
+Also support generic matrix operation, you can choose it when compile!
 
 
 ## 2. Audio Capture Introduction
@@ -55,7 +55,10 @@ Before step 1 need done.
 
 cd src/build/
 
-run make
+Compile types | compile command
+---|---|
+use openblas | make USE_OPEN_BLAS=true |
+without openblas | make |
 
 then you can see decoder.bin executable file, in this demo, you can say wakeup word "智能管家", it can recognized and very few misidentifications.
 
