@@ -33,15 +33,17 @@ void AsrDecodingBegin(std::vector<BaseFloat> &waveform)
 bool AsrDecodingResult(std::vector<std::string> &result, BaseFloat *likelihood)
 {
     std::vector<int32> alignment, words_seq;
+    BaseFloat total_likelihood;
 
-	if (!GetLinearSymbolSequence(&alignment, &words_seq, likelihood))
-		return false;
+    if (!GetLinearSymbolSequence(&alignment, &words_seq, &total_likelihood))
+        return false;
 
-	for (int i = 0; i < words_seq.size(); ++i)
-		result.push_back(WordId2Str(words_seq[i]));
+    for (int i = 0; i < words_seq.size(); ++i)
+	result.push_back(WordId2Str(words_seq[i]));
 
-	BaseFloat per_likelihood = - (*likelihood) / alignment.size();  //compute average likelihood
-	std::cout << "likelihood per frame is : " << per_likelihood << " over " << alignment.size() << " frames." << std::endl;
+    BaseFloat per_likelihood = - total_likelihood / alignment.size();  //compute average likelihood
+    std::cout << "likelihood per frame is : " << per_likelihood << " over " << alignment.size() << " frames." << std::endl;
+    *likelihood = per_likelihood;
 
     return true;
 }

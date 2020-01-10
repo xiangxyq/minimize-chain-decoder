@@ -61,32 +61,15 @@ void AddMatMat(const BaseFloat alpha, const Matrix *A, MatrixTransposeType trans
 		beta, out->data, out->mInfo.stride);
 #else
 	BaseFloat result = 0.0f ;
-	Matrix A1, B1, C;
-	ResizeMatrix(A->mInfo.num_rows, A->mInfo.num_cols, kDefaultStride, &A1);
-	for(int i = 0;  i < A1.mInfo.num_rows; i++)
-		memcpy(A1.data + i * A1.mInfo.num_cols, A->data + i * A->mInfo.stride, A1.mInfo.num_cols * sizeof(BaseFloat));
-
-	ResizeMatrix(B->mInfo.num_rows, B->mInfo.num_cols, kDefaultStride, &B1);
-	for(int i = 0;  i < B1.mInfo.num_rows; i++)
-		memcpy(B1.data + i * B1.mInfo.num_cols, B->data + i * B->mInfo.stride, B1.mInfo.num_cols * sizeof(BaseFloat));
-
-	ResizeMatrix(A->mInfo.num_rows, B->mInfo.num_rows, kDefaultStride, &C);
 	for(int i = 0 ; i < A->mInfo.num_rows ; i++)
 	{
 		for(int j = 0 ; j < B->mInfo.num_rows; j++)
 		{
 			result = 0.0f ;
-			for(int k = 0 ; k < A->mInfo.num_cols ; ++k)  result += A1.data[i * A->mInfo.num_cols + k] * B1.data[ j* A->mInfo.num_cols + k] ;
-			C.data[i * B->mInfo.num_rows + j] = result ;
+			for(int k = 0 ; k < A->mInfo.num_cols ; ++k)  result += A->data[i * A->mInfo.stride + k] * B->data[ j* B->mInfo.stride + k] ;
+			out->data[i * out->mInfo.stride + j] += result;
 		}
 	}
-	for (int i = 0;  i < C.mInfo.num_rows; i++)
-		for(int j =0 ; j < C.mInfo.num_cols; j++)
-			out->data[i * out->mInfo.stride + j] +=C.data[i * C.mInfo.num_cols + j];
-
-	FreeMatrix(&A1);
-	FreeMatrix(&B1);
-	FreeMatrix(&C);
 #endif // USE_OPENBLAS
 }
 // ###################### Above math use openblas interfaces End ######################

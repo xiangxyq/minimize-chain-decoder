@@ -10,7 +10,7 @@ CC = gcc
 CXX = g++
 STRIP = strip
 
-USE_OPEN_BLAS=
+USE_OPEN_BLAS=true
 
 ifeq ($(USE_OPEN_BLAS) , true)
 OPENBLASINC = ../../tools/openblas/install/include
@@ -20,14 +20,13 @@ endif
 ALSAINC = ../../tools/alsa/install/include
 ALSALIBS = ../../tools/alsa/install/lib
 
-CC_OPTIONS = -std=c99 -I.. -I$(OPENBLASINC) -I$(ALSAINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self
-CXX_OPTIONS = -std=c++11 -I.. -I$(OPENBLASINC) -I$(ALSAINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self
-
 ifeq ($(USE_OPEN_BLAS), true)
+CC_OPTIONS = -std=c99 -I.. -I$(OPENBLASINC) -I$(ALSAINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self -D USE_OPENBLAS
+CXX_OPTIONS = -std=c++11 -I.. -I$(OPENBLASINC) -I$(ALSAINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self -D USE_OPENBLAS
 LIBS = -ldl  -lm $(OPENBLASLIBS) -L$(ALSALIBS) -lasound -lpthread
-C_OPTIONS += -D USE_OPENBLAS
-CXX_OPTIONS += -D USE_OPENBLAS
 else
+CC_OPTIONS = -std=c99 -I.. -I$(ALSAINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self
+CXX_OPTIONS = -std=c++11 -I.. -I$(ALSAINC) -c -pthread -O3 -Wall -Wno-sign-compare -Wno-unused-local-typedefs -Wno-deprecated-declarations -Winit-self
 LIBS = -ldl  -lm -L$(ALSALIBS) -lasound -lpthread
 endif
 
